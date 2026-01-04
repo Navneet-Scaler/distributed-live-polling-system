@@ -1,6 +1,5 @@
-from typing import Dict
-
 from pydantic import BaseModel
+from typing import Dict
 
 
 class VoteRequest(BaseModel):
@@ -10,4 +9,3 @@ class VoteRequest(BaseModel):
 class PollResults(BaseModel):
     poll_id: str
     results: Dict[str, int]
-    served_via: str
