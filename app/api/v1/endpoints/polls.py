@@ -1,34 +1,46 @@
-from fastapi import APIRouter, HTTPException
+import asyncio
+from collections import defaultdict
+from typing import Dict
 
-from app.schemas.poll import PollResults, VoteRequest
-from app.services.polling_service import PollingService
-
-router = APIRouter()
-
-service = PollingService()
+from app.core.config import settings
+from app.core.redis_manager import RedisManager
 
 
-@router.on_event("startup")
-async def startup_event():
-    import asyncio
-    asyncio.create_task(service.flush_batch())
+class PollingService:
+    # In-memory storage for Task 1 & Task 4 (Batch buffer)
+    _memory_storage = defaultdict(lambda: defaultdict(int))
 
+    def __init__(self):
+        self.redis_manager = RedisManager()
 
-@router.post("/vote/{poll_id}")
-async def vote(poll_id: str, vote_req: VoteRequest):
-    try:
-        await service.vote(poll_id, vote_req.option_id)
-        return {"status": "success", "message": "Vote accepted"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    async def vote(self, poll_id: str, option_id: str) -> None:
+        """
+        Registers a vote.
+        Task 1: Store in memory.
+        Task 2: Write to Redis immediately.
+        Task 4: Buffer in memory (Batching).
+        """
+        # TODO: Implement vote logic based on the current task
+        raise NotImplemented
 
+    async def get_results(self, poll_id: str) -> Dict[str, int]:
+        """
+        Get results.
+        Task 1: Read from memory.
+        Task 2: Read from Redis.
+        Task 3: Check App Cache -> Redis.
+        Task 4: Redis + Memory Buffer.
+        """
+        # TODO: Implement result fetching logic
+        # Should return a dictionary like {"OptionA": 5, "OptionB": 3}
+        raise NotImplemented
 
-@router.get("/results/{poll_id}", response_model=PollResults)
-async def get_results(poll_id: str):
-    results = await service.get_results(poll_id)
-    served_via = "unknown"  # TODO: determine how & where to get this info from
-    return PollResults(
-        poll_id=poll_id,
-        results=results,
-        served_via=served_via
-    )
+    async def flush_batch(self):
+        """
+        Task 4: Background process to flush memory buffer to Redis.
+        """
+        # TODO: Implement the batch flushing loop
+        # 1. Loop forever (while True)
+        # 2. Wait for BATCH_INTERVAL_SECONDS
+        # 3. Flush _memory_storage to Redis
+        raise NotImplemented
