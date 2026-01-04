@@ -11,4 +11,4 @@ async def health_check():
     return {"status": "healthy"}
 
 
-app.include_router(api_router, prefix=settings.API_PREFIX)
+app.include_router(api_router)
